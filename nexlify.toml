@@ -1,0 +1,15 @@
+[build]
+  command = "echo 'No build required'"
+  functions = "netlify/functions"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "no-referrer"
+    
+# Allow camera & geolocation permissions
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Permissions-Policy = "camera=*, geolocation=*"
